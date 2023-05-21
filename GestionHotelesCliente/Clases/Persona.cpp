@@ -4,12 +4,12 @@
 #include <iostream>
 using namespace std;
 
-Persona::Persona(const char *nombre, int id)
+Persona::Persona(const char *nombre, int dni)
 {
 	cout << "Constructor Persona" << endl;
 	this->nombre = new char[strlen(nombre) + 1];
 	strcpy(this->nombre, nombre);
-	this->id = id;
+	this->dni = dni;
 }
 
 Persona::Persona(const Persona& p)
@@ -17,7 +17,7 @@ Persona::Persona(const Persona& p)
 	cout << "Constructor Copia Persona" << endl;
 	this->nombre = new char[strlen(p.nombre) + 1];
 	strcpy(this->nombre, p.nombre);
-	this->id = p.id;
+	this->dni = p.dni;
 }
 
 Persona::~Persona()
@@ -31,7 +31,7 @@ const char* Persona::getNombre()
 	return this->nombre;
 }
 
-int Persona::getId()
+int Persona::getDni()
 {
-	return this->id;
+	return this->dni;
 }

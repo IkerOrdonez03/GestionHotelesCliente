@@ -4,15 +4,15 @@
 class Persona
 {
 	char *nombre;
-	int id;
+	int dni;
 
 public:
-	Persona(const char* nombre, int id);
+	Persona(const char* nombre, int dni);
 	Persona(const Persona &p);
 	virtual ~Persona();
 
 	const char* getNombre();
-	int getId();
+	int getDni();
 };
 
 #endif

@@ -1,13 +1,18 @@
-/*
- * Persona.h
- *
- *  Created on: 21 may 2023
- *      Author: iker2
- */
-
 #ifndef CLASES_PERSONA_H_
 #define CLASES_PERSONA_H_
 
+class Persona
+{
+	char *nombre;
+	int id;
 
+public:
+	Persona(const char* nombre, int id);
+	Persona(const Persona &p);
+	virtual ~Persona();
 
-#endif /* CLASES_PERSONA_H_ */
+	const char* getNombre();
+	int getId();
+};
+
+#endif

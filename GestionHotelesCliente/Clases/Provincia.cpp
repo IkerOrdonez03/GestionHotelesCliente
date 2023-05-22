@@ -31,7 +31,7 @@ int Provincia::getId(){
 	return this->id;
 }
 
-void Provincia::imprimirProvincia(Provincia p){
-	std::cout << "Nombre: " << p.getNombre() << " Id: " << p.getNombre() << std::endl;
+void Provincia::imprimirProvincia(){
+	std::cout << "Nombre: " << this->getNombre() << " Id: " << this->getId() << std::endl;
 }
 

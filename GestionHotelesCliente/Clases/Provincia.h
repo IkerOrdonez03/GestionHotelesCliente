@@ -14,7 +14,7 @@ public:
 	virtual ~Provincia();
 	const char* getNombre();
 	int getId();
-	void imprimirProvincia(Provincia p);
+	void imprimirProvincia();
 
 private:
 	int id;

@@ -6,7 +6,7 @@ using namespace std;
 void printPersona(Persona p)
 {
 	cout << "Nombre: " << p.getNombre() << endl;
-	cout << "Edad: " << p.getId() << endl;
+	cout << "DNI: " << p.getDni() << endl;
 }
 
 int main()

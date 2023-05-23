@@ -1,12 +1,18 @@
-/*
- * SocketCliente.cpp
- *
- *  Created on: 23 may 2023
- *      Author: iker2
- */
-
 #include <iostream>
 #include <winsock2.h>
+
+bool enviarCredenciales(SOCKET clientSocket, const std::string& usuario, const std::string& contrasena) {
+    // Construir el mensaje a enviar al servidor
+    std::string mensaje = usuario + "," + contrasena;
+
+    // Enviar los datos al servidor
+    int bytesEnviados = send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+    if (bytesEnviados == SOCKET_ERROR) {
+        std::cerr << "Error al enviar los datos al servidor." << std::endl;
+        return false;    }
+
+    return true;
+}
 
 int main() {
     WSADATA wsaData;
@@ -37,20 +43,18 @@ int main() {
         return 1;
     }
 
-    // Envío y recepción de datos
-    char buffer[1024];
-    memset(buffer, 0, sizeof(buffer));
+    // Solicitar usuario y contraseña al usuario
+    std::string usuario, contrasena;
+    std::cout << "Ingrese el usuario: ";
+    std::cin >> usuario;
+    std::cout << "Ingrese la contrasena: ";
+    std::cin >> contrasena;
 
-    // Enviar datos al servidor
-    const char* message = "Hola, servidor!";
-    send(clientSocket, message, strlen(message), 0);
-    std::cout << "Mensaje enviado al servidor." << std::endl;
-
-    // Recibir datos del servidor
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    if (bytesRead > 0) {
-        buffer[bytesRead] = '\0';
-        std::cout << "Mensaje recibido del servidor: " << buffer << std::endl;
+    // Enviar credenciales al servidor
+    if (enviarCredenciales(clientSocket, usuario, contrasena)) {
+        std::cout << "Credenciales enviadas al servidor." << std::endl;
+    } else {
+        std::cerr << "Error al enviar las credenciales al servidor." << std::endl;
     }
 
     // Cerrar el socket y limpiar winsock
@@ -59,4 +63,3 @@ int main() {
 
     return 0;
 }
-

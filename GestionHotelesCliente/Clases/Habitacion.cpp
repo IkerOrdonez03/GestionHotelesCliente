@@ -7,6 +7,7 @@
 
 #include "Habitacion.h"
 
+
 Habitacion::Habitacion() {
 	id = 0;
 	numero = 0;

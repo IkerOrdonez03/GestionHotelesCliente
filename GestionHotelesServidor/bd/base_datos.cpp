@@ -154,3 +154,24 @@ int validaCliente(char* usuario, char* clave, sqlite3* db) {
     return strcmp(c, clave);
 }
 
+int insertarCliente(const std::string& dni, const std::string& nombre, const std::string& direccion, const std::string& telefono, const std::string& usuario, const std::string& clave, sqlite3* db) {
+    sqlite3_stmt* stmt;
+    const char* sql = "INSERT INTO CLIENTE (DNI, NOM_CLTE, DIR_CLTE, TF_CLTE, USUARIO_CLTE, CLAVE_CLTE) VALUES (?, ?, ?, ?, ?, ?)";
+
+    int result = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+    if (result != SQLITE_OK) {
+        std::cout << "Error preparing statement: " << sqlite3_errmsg(db) << std::endl;
+        return result;
+    }
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        std::cout << "Error inserting client: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return result;
+    }
+
+    sqlite3_finalize(stmt);
+    return SQLITE_OK;
+}
+

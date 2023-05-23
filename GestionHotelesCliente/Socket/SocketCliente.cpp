@@ -61,5 +61,9 @@ int main() {
     closesocket(clientSocket);
     WSACleanup();
 
+    // CUANDO SE COMPRUEBEN LAS CREDENCIALES
+
+
+
     return 0;
 }

@@ -9,8 +9,7 @@
 #include <iostream>
 #include "Provincia.h"
 #include "Hotel.h"
-#include "Provincia.h"
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>

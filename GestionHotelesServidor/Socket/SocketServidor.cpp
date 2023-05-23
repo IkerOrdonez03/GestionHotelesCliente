@@ -1,5 +1,6 @@
 #include <iostream>
 #include <winsock2.h>
+#include "../bd/base_datos.h"
 
 
 bool recibirCredenciales(SOCKET clientSocket, std::string& usuario, std::string& contrasena) {
@@ -28,6 +29,15 @@ bool recibirCredenciales(SOCKET clientSocket, std::string& usuario, std::string&
 }
 
 int main() {
+	//INICIALIZACION DE LA BD
+	sqlite3 * db;
+	int result = sqlite3_open("bd/hotel.sqlite", &db);
+	if (result != SQLITE_OK) {
+		std::cout << "Error opening database\n";
+	} else {
+		std::cout << "Opened database\n";
+	}
+
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Error al inicializar winsock." << std::endl;
@@ -75,18 +85,38 @@ int main() {
 
     // Recibir credenciales del cliente
     std::string usuario, contrasena;
+    // Convertir std::string a const char*
+    const char* usuarioCharCons = usuario.c_str();
+    const char* contrasenaCharCons = contrasena.c_str();
+    // Convertir const char* a char* utilizando casting explícito
+    char* usuarioChar = const_cast<char*>(usuarioCharCons);
+    char* contrasenaChar = const_cast<char*>(contrasenaCharCons);
+
     if (recibirCredenciales(clientSocket, usuario, contrasena)) {
-        std::cout << "Credenciales recibidas del cliente:" << std::endl;
-        std::cout << "Usuario: " << usuario << std::endl;
-        std::cout << "Contrasena: " << contrasena << std::endl;
+
+    	if(validadAdmin(usuarioChar, contrasenaChar, db) == 0) {
+    		std::cout << "Credenciales recibidas del cliente:" << std::endl;
+    		std::cout << "Usuario: " << usuario << std::endl;
+    		std::cout << "Contrasena: " << contrasena << std::endl;
+    	}
+
     } else {
         std::cerr << "Error al recibir las credenciales del cliente." << std::endl;
     }
+
 
     // Cerrar los sockets y limpiar winsock
     closesocket(clientSocket);
     closesocket(serverSocket);
     WSACleanup();
+
+    //CERRAR LA BD
+    result = sqlite3_close(db);
+    if (result != SQLITE_OK) {
+    	std::cout << "Error closing database";
+    	return result;
+    }
+    std::cout << "\nDatabase closed";
 
     return 0;
 }

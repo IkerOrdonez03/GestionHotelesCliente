@@ -19,6 +19,6 @@ int insertarHotel (Hotel *, sqlite3*);
 int eliminarHotel (Hotel*, sqlite3*);
 
 // Segunda entrega
-int validadCliente(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
+int validaCliente(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
 
 #endif /* BASE_DATOS_H_ */

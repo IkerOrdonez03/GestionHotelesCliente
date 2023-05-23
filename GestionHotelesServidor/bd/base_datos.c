@@ -178,3 +178,34 @@ int eliminarHotel (Hotel * hotel, sqlite3 *db) {
 
 	return result;
 }
+
+
+// Segunda entrega
+int validadCliente(char* usuario, char* clave, sqlite3 *db) {
+	char c[30];
+
+	sqlite3_stmt *stmt;
+	char sql[] = "SELECT CLAVE_CLTE FROM CLIENTE WHERE USUARIO_CLTE = ?";
+	int result = sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
+	if (result != SQLITE_OK) {
+		strcpy(mensaje, strcat("Error preparing statement (SELECT)", sqlite3_errmsg(db)));
+		logMensaje(mensaje);
+	}
+	else {
+		strcpy(mensaje,"SQL query prepared (SELECT)");
+		logMensaje(mensaje);
+	}
+	result = sqlite3_bind_text(stmt, 1, usuario, strlen(usuario), SQLITE_STATIC);
+	result = sqlite3_step(stmt) ;
+	if (result == SQLITE_ROW) {
+		strcpy(c, (char *) sqlite3_column_text(stmt, 0));
+	}
+	result = sqlite3_finalize(stmt);
+	return strcmp(c, clave);
+}
+
+
+
+
+
+

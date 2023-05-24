@@ -12,13 +12,13 @@
 #include <iostream>
 #include <string>
 
-void guardarReserva(char cod_Reserva[], Fecha fa_ini, Fecha fa_fin, int id_hotel, int num_Personas) {
+void guardarReserva(int id, Fecha fa_ini, Fecha fa_fin, int id_hotel, int num_Personas) {
 
     std::ofstream fichero;
     fichero.open("reservas.txt", std::ios::app);
 
 
-    fichero << cod_Reserva << "|" << fa_ini.dia << "/" << fa_ini.mes << "/" << fa_ini.anyo << "|"
+    fichero << id << "|" << fa_ini.dia << "/" << fa_ini.mes << "/" << fa_ini.anyo << "|"
             << fa_fin.dia << "/" << fa_fin.mes << "/" << fa_fin.anyo << "|" << id_hotel << "|"
             << num_Personas << "\n";
 
@@ -26,7 +26,7 @@ void guardarReserva(char cod_Reserva[], Fecha fa_ini, Fecha fa_fin, int id_hotel
     fichero.close();
 }
 
-void guardarHotel(int id, char nom[50], int numEst, int idProv) {
+void guardarHotel(int id, char* nom, int numEst, int idProv) {
     std::ofstream fichero("hoteles.txt", std::ios::app);
 
     if (!fichero) {

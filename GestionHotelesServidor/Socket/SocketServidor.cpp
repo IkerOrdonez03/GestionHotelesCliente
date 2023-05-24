@@ -173,6 +173,19 @@ int main() {
 						// Ejemplo de respuesta al cliente
 						std::string respuesta = "Autenticación exitosa"; // Cambia esto según tu lógica de autenticación
 						std::cout << respuesta << std::endl;
+
+//						Recibe la opcion del segundo menu
+						if (recibirOpcion(clientSocket, opcionElegida)){
+							std::cout << "Opcion: " << opcionElegida << std::endl;
+							if (opcionElegida == 1){
+
+							} else if(opcionElegida == 2){
+
+							} else if (opcionElegida == 3){
+
+							} else {}
+						}
+
 					} else {
 						std::string respuesta = "Autenticación erronea";
 						std::cout << respuesta << std::endl;
@@ -188,6 +201,16 @@ int main() {
         		if (recibirCliente(clientSocket, dni, nombre, direccion, telefono, usuario, contrasena)){
 					if (registrarCliente(clientSocket, dni, nombre, direccion, telefono, usuario, contrasena, db)){
 						std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado correctamente" << std::endl;
+
+//						Recibe la opcion del segundo menu
+						if (opcionElegida == 1){
+							std::cout << "Opcion recibida 1." << std::endl;
+						} else if(opcionElegida == 2){
+							std::cout << "Opcion recibida 2." << std::endl;
+						} else if (opcionElegida == 3){
+							std::cout << "Opcion recibida 3." << std::endl;
+						} else{}
+
 					} else {
 						std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado incorrectamente" << std::endl;
 					}

@@ -156,12 +156,37 @@ int validaCliente(char* usuario, char* clave, sqlite3* db) {
 
 int insertarCliente(const std::string& dni, const std::string& nombre, const std::string& direccion, const std::string& telefono, const std::string& usuario, const std::string& clave, sqlite3* db) {
     sqlite3_stmt* stmt;
-    const char* sql = "INSERT INTO CLIENTE (DNI, NOM_CLTE, DIR_CLTE, TF_CLTE, USUARIO_CLTE, CLAVE_CLTE) VALUES (?, ?, ?, ?, ?, ?)";
+    const char* sql = "INSERT INTO CLIENTE (DNI, NOM_CLTE, DIR_CLTE, TF_CLTE, USUARIO_CLTE, CLAVE_CLTE) VALUES (?, ?, ?, ?, ?, ? )";
 
     int result = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
     if (result != SQLITE_OK) {
         std::cout << "Error preparing statement: " << sqlite3_errmsg(db) << std::endl;
         return result;
+    }
+
+    result = sqlite3_bind_text(stmt, 1, dni.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+    result = sqlite3_bind_text(stmt, 2, nombre.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+    }
+    result = sqlite3_bind_text(stmt, 3, direccion.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+    }
+    result = sqlite3_bind_text(stmt, 4, telefono.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+    }
+    result = sqlite3_bind_text(stmt, 5, usuario.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+    }
+    result = sqlite3_bind_text(stmt, 6, clave.c_str(), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
     }
 
     result = sqlite3_step(stmt);

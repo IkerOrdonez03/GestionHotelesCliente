@@ -15,9 +15,23 @@ bool enviarCredenciales(SOCKET clientSocket, const std::string& usuario, const s
     return true;
 }
 
+bool enviarOpcion(SOCKET clientSocket, int opcion) {
+    // Construir el mensaje a enviar al servidor
+	std::string mensaje = std::to_string(opcion);
+
+    // Enviar los datos al servidor
+    int bytesEnviados = send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+    if (bytesEnviados == SOCKET_ERROR) {
+        std::cerr << "Error al enviar los datos al servidor." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool registrarCliente(SOCKET clientSocket, const std::string& dni, const std::string& nombre, const std::string& direccion, const std::string& telefono, const std::string& usuario, const std::string& contrasena) {
     // Construir el mensaje a enviar al servidor
-    std::string mensaje = "REGISTRO," + dni + "," + nombre + "," + direccion + "," + telefono + "," + usuario + "," + contrasena;
+    std::string mensaje = dni + "," + nombre + "," + direccion + "," + telefono + "," + usuario + "," + contrasena;
 
     // Enviar los datos al servidor
     int bytesEnviados = send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
@@ -66,6 +80,11 @@ int main() {
     std::cin >> opcion;
 
     if (opcion == 1) {
+    	if(enviarOpcion(clientSocket, opcion)){
+    		std::cout << "Opcion enviada al servidor." << std::endl;
+		} else {
+			std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+		}
         // Iniciar sesión
         std::string usuario, contrasena;
         std::cout << "Ingrese el usuario: ";
@@ -80,23 +99,26 @@ int main() {
             std::cerr << "Error al enviar las credenciales al servidor." << std::endl;
         }
     } else if (opcion == 2) {
+    	if(enviarOpcion(clientSocket, opcion)){
+			std::cout << "Opcion enviada al servidor." << std::endl;
+		} else {
+			std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+		}
         // Registrar un nuevo cliente
         std::string dni, nombre, direccion, telefono, usuario, contrasena;
+        std::cin.ignore();
         std::cout << "Ingrese el DNI: ";
-        std::cin >> dni;
+        std::getline(std::cin, dni);
         std::cout << "Ingrese el nombre: ";
-        std::cin.ignore(); // Ignorar el salto de línea pendiente
         std::getline(std::cin, nombre);
         std::cout << "Ingrese la dirección: ";
         std::getline(std::cin, direccion);
         std::cout << "Ingrese el teléfono: ";
-        std::cin >> telefono;
         std::getline(std::cin, telefono);
         std::cout << "Ingrese el nombre de usuario: ";
-        std::cin >> usuario;
         std::getline(std::cin, usuario);
         std::cout << "Ingrese la contrasena de usuario: ";
-        std::cin >> contrasena;
+        std::getline(std::cin, contrasena);
 
         // Enviar datos al servidor
         if (registrarCliente(clientSocket, dni, nombre, direccion, telefono, usuario, contrasena)) {

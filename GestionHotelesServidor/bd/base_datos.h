@@ -5,19 +5,19 @@
 #include <iostream>
 #include <stdio.h>
 #include "sqlite3.h"
-//#include "../provincias/Provincias.h"
-//#include "../hoteles/Hoteles.h"
+#include "../Clases/Provincias.h"
+#include "../Clases/Hoteles.h"
 #include "../logger/log.h"
 
 
 // Primera entrega
 int validadAdmin(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
 int contarProvincias(sqlite3*);
-//int initProvincias (Provincias*, sqlite3*);
+int initProvincias (Provincias*, sqlite3*);
 int contarHoteles(sqlite3*);
-//int initHoteles (Hoteles*, sqlite3*, Provincias*);
-//int insertarHotel (Hotel *, sqlite3*);
-//int eliminarHotel (Hotel*, sqlite3*);
+int initHoteles (Hoteles*, sqlite3*, Provincias*);
+int insertarHotel (Hotel *, sqlite3*);
+int eliminarHotel (Hotel*, sqlite3*);
 
 // Segunda entrega
 int validaCliente(char*, char*, sqlite3*); // 0 es valido(el resto invalido)

@@ -5,8 +5,8 @@
 #include <iostream>
 #include <stdio.h>
 #include "sqlite3.h"
-#include "../provincia/provincia.h"
-#include "../hotel/hotel.h"
+#include "../provincia/Provincias.h"
+#include "../hotel/Hoteles.h"
 #include "../logger/log.h"
 
 

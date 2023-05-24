@@ -1,10 +1,3 @@
-/*
- * Hotel.h
- *
- *  Created on: 21 may 2023
- *      Author: benat
- */
-
 #ifndef CLASES_HOTEL_H_
 #define CLASES_HOTEL_H_
 

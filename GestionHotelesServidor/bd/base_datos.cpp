@@ -1,10 +1,17 @@
 #include "base_datos.h"
+#include "../reserva/reserva.h"
+#include "../hotel/Hotel.h"
 #include <iostream>
 #include <string>
 #include <cstring>
 #include "sqlite3.h"
 
 std::string mensaje;
+
+char* parseInt(char *resultado, int n){
+	sprintf(resultado, "%d", n);
+	return resultado;
+}
 
 int validadAdmin(char* usuario, char* clave, sqlite3* db) {
     char c[30];
@@ -53,6 +60,30 @@ int contarProvincias(sqlite3* db) {
     return contador;
 }
 
+
+int contarHoteles(sqlite3 *db) {
+	int contador;
+	sqlite3_stmt *stmt;
+		char sql[] = "SELECT COUNT(ID_HOTEL) FROM HOTEL";
+
+		int result = sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL) ;
+		if (result != SQLITE_OK) {
+			 mensaje = "Error preparing statement (SELECT)" + std::string(sqlite3_errmsg(db));
+			std::cout << mensaje << std::endl;
+		}
+		else {
+			mensaje = "SQL query prepared (SELECT)";
+			std::cout << mensaje << std::endl;
+		}
+		result = sqlite3_step(stmt) ;
+			if (result == SQLITE_ROW) {
+				contador = sqlite3_column_int(stmt, 0);
+			}
+		result = sqlite3_finalize(stmt);
+
+		return contador;
+}
+
 int initHoteles(Hoteles* hoteles, sqlite3* db, Provincias* provincias) {
     sqlite3_stmt* stmt;
     const char* sql = "SELECT ID_HOTEL, NOM_HOTEL, NUM_ESTTRELLAS, ID_PROV FROM HOTEL";
@@ -66,16 +97,17 @@ int initHoteles(Hoteles* hoteles, sqlite3* db, Provincias* provincias) {
         mensaje = "SQL query prepared (SELECT)";
         std::cout << mensaje << std::endl;
     }
-    for (int i = 0; i < hoteles->numHoteles; ++i) {
+    hoteles->numHoteles = contarHoteles(db);
+    memset(hoteles->hoteles, 0, hoteles->numHoteles * sizeof(Hotel));
+    for (int i = 0; i < contarHoteles(db); ++i) {
         result = sqlite3_step(stmt);
         if (result == SQLITE_ROW) {
-            hoteles->hoteles[i].id = sqlite3_column_int(stmt, 0);
-            strcpy(hoteles->hoteles[i].name, (char*)sqlite3_column_text(stmt, 1));
-            hoteles->hoteles[i].estrellas = sqlite3_column_int(stmt, 2);
             for (int n = 0; n < contarProvincias(db); ++n) {
-                if (provincias->provincias[n].id == sqlite3_column_int(stmt, 3)) {
-                    hoteles->hoteles[i].provincia = &provincias->provincias[n];
-                }
+            	hoteles->hoteles[i].setId(sqlite3_column_int(stmt, 0));
+            	hoteles->hoteles[i].setNombre((char*)sqlite3_column_text(stmt, 1));
+            	hoteles->hoteles[i].setEstrellas(sqlite3_column_int(stmt, 2));
+            	Provincia prov = provincias->getProvinciaPorId(sqlite3_column_int(stmt, 3));
+            	hoteles->hoteles[i].setProvincia(&prov);
             }
         }
     }
@@ -85,12 +117,11 @@ int initHoteles(Hoteles* hoteles, sqlite3* db, Provincias* provincias) {
     return result;
 }
 
-int insertarHotel(Hotel* hotel, sqlite3* db) {
+int initProvinvias(Provincias* provincias, sqlite3* db) {
     sqlite3_stmt* stmt;
-    const char* sql = "INSERT INTO HOTEL (NOM_HOTEL, NUM_ESTTRELLAS, ID_PROV) VALUES (?, ?, ?)";
+    const char* sql = "SELECT ID_PROV, NOM_PROV FROM PROVINCIA";
 
     int result = sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
-
     if (result != SQLITE_OK) {
         mensaje = "Error preparing statement (SELECT)" + std::string(sqlite3_errmsg(db));
         std::cout << mensaje << std::endl;
@@ -99,36 +130,105 @@ int insertarHotel(Hotel* hotel, sqlite3* db) {
         mensaje = "SQL query prepared (SELECT)";
         std::cout << mensaje << std::endl;
     }
-    char nombre[50];
-    strcpy(nombre, hotel->name);
-    result = sqlite3_bind_text(stmt, 1, nombre, strlen(nombre) + 1, SQLITE_STATIC);
-    result = sqlite3_bind_int(stmt, 2, hotel->estrellas);
-    result = sqlite3_bind_int(stmt, 3, hotel->provincia->id);
-    result = sqlite3_step(stmt);
+    provincias->numProvincias = contarProvincias(db);
+    memset(provincias->provincias, 0, provincias->numProvincias * sizeof(Provincia));
+    for (int i = 0; i < provincias->numProvincias; ++i) {
+        result = sqlite3_step(stmt);
+        if (result == SQLITE_ROW) {
+        	provincias->provincias[i].setId(sqlite3_column_int(stmt, 0));
+        	provincias->provincias[i].setNombre((char*)sqlite3_column_text(stmt, 1));
+        }
+    }
+
     result = sqlite3_finalize(stmt);
+
     return result;
 }
 
-int eliminarHotel(Hotel* hotel, sqlite3* db) {
-    sqlite3_stmt* stmt;
-    const char* sql = "DELETE FROM HOTEL WHERE ID_HOTEL == ?";
 
-    int result = sqlite3_prepare_v2(db, sql, strlen(sql) + 1, &stmt, NULL);
+int insertarReserva(Reserva *reserva, sqlite3* db){
+	sqlite3_stmt* stmt;
+	const char* sql = "INSERT INTO RESERVA (ID_RES, DIA_INI, MES_INI, ANO_INI, DIA_FIN, MES_FIN, ANO_FIN, ID_HAB, DNI) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? )";
 
-    if (result != SQLITE_OK) {
-        mensaje = "Error preparing statement (SELECT)" + std::string(sqlite3_errmsg(db));
-        std::cout << mensaje << std::endl;
-    }
-    else {
-        mensaje = "SQL query prepared (SELECT)";
-        std::cout << mensaje << std::endl;
-    }
+	int result = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	if (result != SQLITE_OK) {
+		std::cout << "Error preparing statement: " << sqlite3_errmsg(db) << std::endl;
+		return result;
+	}
 
-    result = sqlite3_bind_int(stmt, 1, hotel->id);
-    result = sqlite3_step(stmt);
-    result = sqlite3_finalize(stmt);
+	char idC[10];
+	parseInt(idC, reserva->getId());
+	result = sqlite3_bind_text(stmt, 1, idC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
 
-    return result;
+	char diaIC[10];
+	parseInt(diaIC, reserva->getDia_Ini());
+	result = sqlite3_bind_text(stmt, 2, diaIC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char mesIC[10];
+	parseInt(mesIC, reserva->getMes_Ini());
+	result = sqlite3_bind_text(stmt, 3, mesIC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char anoIC[10];
+	parseInt(anoIC, reserva->getAno_Ini());
+	result = sqlite3_bind_text(stmt, 4, anoIC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char diaFC[10];
+	parseInt(diaFC, reserva->getDia_Fin());
+	result = sqlite3_bind_text(stmt, 5, diaFC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char mesFC[10];
+	parseInt(mesFC, reserva->getMes_Fin());
+	result = sqlite3_bind_text(stmt, 6, mesFC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char anoFC[10];
+	parseInt(anoFC, reserva->getAno_Fin());
+	result = sqlite3_bind_text(stmt, 7, anoFC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+
+	char idH[10];
+	parseInt(idH, reserva->getId());
+	result = sqlite3_bind_text(stmt, 8, idH, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	char dniC[10];
+	parseInt(dniC, reserva->getDniCliente());
+	result = sqlite3_bind_text(stmt, 9, dniC, -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	result = sqlite3_step(stmt);
+	if (result != SQLITE_DONE) {
+		std::cout << "Error inserting client: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(stmt);
+		return result;
+	}
+
+	sqlite3_finalize(stmt);
+	return SQLITE_OK;
 }
 
 int validaCliente(char* usuario, char* clave, sqlite3* db) {

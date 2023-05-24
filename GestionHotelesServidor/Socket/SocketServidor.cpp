@@ -43,12 +43,17 @@ bool registrarCliente(SOCKET clientSocket, const std::string& dni, const std::st
         std::cerr << "Error al enviar la respuesta al cliente." << std::endl;
         return false;
     }
-
     return true;
 }
 
 
 int main() {
+	//INICIALIZACION DE LA BD
+	sqlite3 * db;
+	int result = sqlite3_open("bd/hotel.sqlite", &db);
+	if (result != SQLITE_OK) {
+		std::cout << "Error opening database";
+	}
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Error al inicializar winsock." << std::endl;
@@ -100,16 +105,28 @@ int main() {
         // Recibir credenciales del cliente
         std::string usuario, contrasena;
         if (recibirCredenciales(clientSocket, usuario, contrasena)) {
+			// Convertir std::string a const char*
+			const char* usuarioCharCons = usuario.c_str();
+			const char* contrasenaCharCons = contrasena.c_str();
+			// Convertir const char* a char* utilizando casting explícito
+			char* usuarioChar = const_cast<char*>(usuarioCharCons);
+			char* contrasenaChar = const_cast<char*>(contrasenaCharCons);
             std::cout << "Credenciales recibidas del cliente:" << std::endl;
             std::cout << "Usuario: " << usuario << std::endl;
             std::cout << "Contraseña: " << contrasena << std::endl;
 
-            // Aquí puedes realizar la lógica de autenticación del usuario en la base de datos
+            // lógica de autenticación del usuario
+            int value = validaCliente(usuarioChar, contrasenaChar, db);
+            if (value == 0){
+            	// Ejemplo de respuesta al cliente
+            	std::string respuesta = "Autenticación exitosa"; // Cambia esto según tu lógica de autenticación
+            	std::cout << respuesta << std::endl;
+            } else {
+            	std::string respuesta = "Autenticación erronea";
+            	std::cout << respuesta << std::endl;
+            }
             // ...
 
-            // Ejemplo de respuesta al cliente
-            std::string respuesta = "Autenticación exitosa"; // Cambia esto según tu lógica de autenticación
-            send(clientSocket, respuesta.c_str(), respuesta.length(), 0);
         } else {
             std::cerr << "Error al recibir las credenciales del cliente." << std::endl;
         }
@@ -117,7 +134,13 @@ int main() {
         // Cerrar el socket del cliente
         closesocket(clientSocket);
     }
-
+    //CERRAR LA BD
+	result = sqlite3_close(db);
+	if (result != SQLITE_OK) {
+		logMensaje(strcat("\nError closing database", sqlite3_errmsg(db)));
+		return result;
+	}
+	logMensaje("\nDatabase closed");
     // Cerrar el socket del servidor y limpiar winsock
     closesocket(serverSocket);
     WSACleanup();

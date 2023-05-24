@@ -103,3 +103,4 @@ void Reserva::setIdHab(int idH){
 void Reserva::setDniCliente(int dni){
 	this->dni_cliente = dni;
 };
+

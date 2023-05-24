@@ -1,8 +1,11 @@
 #include <iostream>
 #include "../bd/sqlite3.h"
 #include "../bd/base_datos.h"
+#include "../reserva/reserva.h"
 #include <winsock2.h>
 #include <sstream>
+#include <string>
+using namespace std;
 static int opcionElegida;
 
 bool recibirReserva(SOCKET clientSocket, std::string&id_res, std::string&dia_ini, std::string&mes_ini, std::string&ano_ini,
@@ -35,6 +38,26 @@ bool recibirReserva(SOCKET clientSocket, std::string&id_res, std::string&dia_ini
 	std::getline(ss, id_hab, ',');
 	std::getline(ss, dni, ',');
 
+	return true;
+}
+
+bool registrarReserva(SOCKET clientSocket,std::string&id_res, std::string&dia_ini, std::string&mes_ini, std::string&ano_ini,
+		std::string&dia_fin, std::string&mes_fin, std::string&ano_fin, std::string&id_hab, std::string&dni, sqlite3* db){
+	Reserva *reserva = new Reserva(std::stoi(id_res), std::stoi(dia_ini), std::stoi(mes_ini), std::stoi(ano_ini), std::stoi(dia_fin), std::stoi(mes_fin), std::stoi(ano_fin), std::stoi(id_hab), std::stoi(dni));
+	int result = insertarReserva(reserva, db);
+	delete(reserva);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al insertar la reserva en la base de datos." << std::endl;
+		return false;
+	}
+
+	// Enviar respuesta al cliente
+	std::string respuesta = "Reserva registrada correctamente.";
+	int bytesEnviados = send(clientSocket, respuesta.c_str(), respuesta.length(), 0);
+	if (bytesEnviados == SOCKET_ERROR) {
+		std::cerr << "Error al enviar la respuesta al cliente." << std::endl;
+		return false;
+	}
 	return true;
 }
 
@@ -221,6 +244,11 @@ int main() {
 									std::cout << "Dni: " << dni << std::endl;
 									std::cout << "Fecha inicio: " << dia_ini << "/" << mes_ini << "/" << ano_ini << std::endl;
 									std::cout << "Fecha fin: " << dia_fin << "/" << mes_fin << "/" << ano_fin << std::endl;
+								if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
+									std::cout << "Reserva realizada correctamente" << std::endl;
+								} else {
+									std::cerr << "Reserva realizada incorrectamente" << std::endl;
+								}
 							} else if (opcionElegida == 3){
 
 							} else {}
@@ -243,16 +271,32 @@ int main() {
 						std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado correctamente" << std::endl;
 
 //						Recibe la opcion del segundo menu
-						if (opcionElegida == 1){
-							std::cout << "Opcion recibida 1." << std::endl;
-						} else if(opcionElegida == 2){
-							std::cout << "Opcion recibida 2." << std::endl;
-						} else if (opcionElegida == 3){
-							std::cout << "Opcion recibida 3." << std::endl;
-						} else{}
+						if (recibirOpcion(clientSocket, opcionElegida)) {
+							if (opcionElegida == 1){
+								std::cout << "Opcion recibida 1." << std::endl;
+							} else if(opcionElegida == 2){
+								std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
+								if(recibirReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni)){
+									std::cout << "Datos de la reserva recibidos:" << std::endl;
+									std::cout << "Id reserva: " << id_res << std::endl;
+									std::cout << "Dni: " << dni << std::endl;
+									std::cout << "Fecha inicio: " << dia_ini << "/" << mes_ini << "/" << ano_ini << std::endl;
+									std::cout << "Fecha fin: " << dia_fin << "/" << mes_fin << "/" << ano_fin << std::endl;
+								if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
+									std::cout << "Reserva realizada correctamente" << std::endl;
+								} else {
+									std::cerr << "Reserva realizada incorrectamente" << std::endl;
+								}
+							} else if (opcionElegida == 3){
 
-					} else {
-						std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado incorrectamente" << std::endl;
+							} else {}
+						} else if (opcionElegida == 3){
+								std::cout << "Opcion recibida 3." << std::endl;
+							} else{}
+
+						} else {
+							std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado incorrectamente" << std::endl;
+						}
 					}
         		} else {
         			std::cout << "Registro incorrecto de Usuario: " << usuario << std::endl;
@@ -265,6 +309,7 @@ int main() {
 
         // Cerrar el socket del cliente
         closesocket(clientSocket);
+    }
     }
     //CERRAR LA BD
 	result = sqlite3_close(db);
@@ -279,3 +324,4 @@ int main() {
 
     return 0;
 }
+

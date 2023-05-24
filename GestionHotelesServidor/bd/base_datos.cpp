@@ -225,7 +225,7 @@ int insertarReserva(Reserva *reserva, sqlite3* db){
 
 	result = sqlite3_step(stmt);
 	if (result != SQLITE_DONE) {
-		std::cout << "Error inserting client: " << sqlite3_errmsg(db) << std::endl;
+		std::cout << "Error inserting reservation: " << sqlite3_errmsg(db) << std::endl;
 		sqlite3_finalize(stmt);
 		return result;
 	}

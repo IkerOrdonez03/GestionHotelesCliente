@@ -1,16 +1,19 @@
-#ifndef PROVINCIA_H_
-#define PROVINCIA_H_
+#ifndef CLASES_PROVINCIA_H_
+#define CLASES_PROVINCIA_H_
 
-typedef struct {
+class Provincia {
+private:
 	int id;
-	char name[20];
-} Provincia;
+	char* nombre;
+public:
+	Provincia(int id, const char* nombre);
+	virtual ~Provincia();
+	const char* getNombre();
+	int getId();
+	void setNombre(char*);
+	void setId(int);
+	void imprimirProvincia();
 
-typedef struct {
-	Provincia *provincias;
-	int numProvincias;
-} Provincias;
+};
 
-void imprimirProvincia(Provincia*);
-
-#endif /* PROVINCIA_H_ */
+#endif /* CLASES_PROVINCIA_H_ */

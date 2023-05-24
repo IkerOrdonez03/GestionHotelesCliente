@@ -32,3 +32,4 @@ void Provincia::setId(int id){
 
 void Provincia::imprimirProvincia(){
 	std::cout << "Nombre: " << this->getNombre() << " Id: " << this->getId() << std::endl;
+}

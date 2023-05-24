@@ -1,20 +1,28 @@
-#ifndef HOTEL_H_
-#define HOTEL_H_
+#ifndef CLASES_HOTEL_H_
+#define CLASES_HOTEL_H_
 
-#include "../provincia/provincia.h"
+#include <string.h>
+#include "../provincia/Provincia.h"
 
-typedef struct {
+class Hotel {
+private:
 	int id;
-	char name[50];
+	char* nombre;
 	int estrellas;
 	Provincia* provincia;
-} Hotel;
+public:
+	Hotel();
+	Hotel(int, const char*, int, Provincia*);
+	Hotel(const Hotel &other);
+	virtual ~Hotel();
+	int getId();
+	void setId(int id);
+	char* getNombre();
+	void setNombre(const char* nombre);
+	int getEstrellas();
+	void setEstrellas(int estrellas);
+	Provincia getProvincia();
+	void setProvincia(Provincia* provincia);
+};
 
-typedef struct {
-	Hotel *hoteles;
-	int numHoteles;
-} Hoteles;
-
-void imprimirHotel(Hotel*);
-
-#endif /* HOTEL_H_ */
+#endif /* CLASES_HOTEL_H_ */

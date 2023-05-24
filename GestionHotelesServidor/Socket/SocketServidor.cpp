@@ -66,54 +66,6 @@ bool recibirOpcion(SOCKET clientSocket, int opcion) {
     return true;
 }
 
-//bool recibirCliente(SOCKET clientSocket, std::string& dni, std::string& nombre, std::string& direccion, std::string& telefono, std::string& usuario, std::string& contrasena){
-//	std::string dniC, nombreC, direccionC, telefonoC, usuarioC, contrasenaC;
-//	const char* dniConsC = dni.c_str();
-//	dniC = const_cast<char*>(dniConsC);
-//	const char* nombreConsC = nombre.c_str();
-//	nombreC = const_cast<char*>(nombreConsC);
-//	const char* direccionConsC = direccion.c_str();
-//	direccionC = const_cast<char*>(direccionConsC);
-//	const char* telefonoConsC = telefono.c_str();
-//	telefonoC = const_cast<char*>(telefonoConsC);
-//	const char* usuarioConsC = usuario.c_str();
-//	usuarioC = const_cast<char*>(usuarioConsC);
-//	const char* contrasenaConsC = contrasena.c_str();
-//	contrasenaC = const_cast<char*>(contrasenaConsC);
-//	char buffer[4000];
-//	memset(buffer, 0, sizeof(buffer));
-//
-//	// Recibir los datos del cliente
-//	int bytesRecibidos = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-//	if (bytesRecibidos == SOCKET_ERROR) {
-//		std::cerr << "Error al recibir los datos del cliente." << std::endl;
-//		return false;
-//	}
-//
-//	// Parsear los datos recibidos
-//	std::string datosRecibidos(buffer);
-//	size_t comaPos = datosRecibidos.find(",");
-//	if (comaPos == std::string::npos) {
-//		std::cerr << "Datos recibidos inválidos." << std::endl;
-//		return false;
-//	}
-//
-//	dniC = datosRecibidos.substr(0, comaPos);
-//	nombreC = datosRecibidos.substr(comaPos + 1);
-//	direccionC = datosRecibidos.substr(comaPos + 2);
-//	telefonoC = datosRecibidos.substr(comaPos + 3);
-//	usuarioC = datosRecibidos.substr(comaPos + 4);
-//	contrasenaC = datosRecibidos.substr(comaPos + 5);
-//	//
-//	dni = dniC;
-//	nombre = nombreC;
-//	direccion = direccionC;
-//	telefono = telefonoC;
-//	usuario = usuarioC;
-//	contrasena = contrasenaC;
-//	return true;
-//}
-
 bool recibirCliente(SOCKET serverSocket, std::string& dni, std::string& nombre, std::string& direccion, std::string& telefono, std::string& usuario, std::string& contrasena) {
     // Definir un buffer para almacenar los datos recibidos
     const int bufferSize = 3000;

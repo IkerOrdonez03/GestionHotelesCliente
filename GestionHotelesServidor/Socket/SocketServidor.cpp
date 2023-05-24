@@ -5,6 +5,40 @@
 #include <sstream>
 static int opcionElegida;
 
+bool recibirReserva(SOCKET clientSocket, std::string&id_res, std::string&dia_ini, std::string&mes_ini, std::string&ano_ini,
+		std::string&dia_fin, std::string&mes_fin, std::string&ano_fin, std::string&id_hab, std::string&dni) {
+	// Definir un buffer para almacenar los datos recibidos
+	const int bufferSize = 3000;
+	char buffer[bufferSize];
+
+	// Recibir los datos del cliente
+	int bytesRecibidos = recv(clientSocket, buffer, bufferSize - 1, 0);
+	if (bytesRecibidos == SOCKET_ERROR) {
+		std::cerr << "Error al recibir los datos del cliente." << std::endl;
+		return false;
+	}
+
+	// Terminar el buffer con un carácter nulo
+	buffer[bytesRecibidos] = '\0';
+
+	// Parsear los datos recibidos separados por comas
+	std::string datos(buffer);
+	std::stringstream ss(datos);
+
+	std::getline(ss, id_res, ',');
+	std::getline(ss, dia_ini, ',');
+	std::getline(ss, mes_ini, ',');
+	std::getline(ss, ano_ini, ',');
+	std::getline(ss, dia_fin, ',');
+	std::getline(ss, mes_fin, ',');
+	std::getline(ss, ano_fin, ',');
+	std::getline(ss, id_hab, ',');
+	std::getline(ss, dni, ',');
+
+	return true;
+}
+
+
 bool recibirCredenciales(SOCKET clientSocket, std::string& usuario, std::string& contrasena) {
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
@@ -180,7 +214,13 @@ int main() {
 							if (opcionElegida == 1){
 
 							} else if(opcionElegida == 2){
-
+								std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
+								if(recibirReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni)){
+									std::cout << "Datos de la reserva recibidos:" << std::endl;
+									std::cout << "Id reserva: " << id_res << std::endl;
+									std::cout << "Dni: " << dni << std::endl;
+									std::cout << "Fecha inicio: " << dia_ini << "/" << mes_ini << "/" << ano_ini << std::endl;
+									std::cout << "Fecha fin: " << dia_fin << "/" << mes_fin << "/" << ano_fin << std::endl;
 							} else if (opcionElegida == 3){
 
 							} else {}

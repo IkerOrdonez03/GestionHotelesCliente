@@ -11,7 +11,6 @@ bool enviarCredenciales(SOCKET clientSocket, const std::string& usuario, const s
         std::cerr << "Error al enviar los datos al servidor." << std::endl;
         return false;
     }
-
     return true;
 }
 
@@ -73,12 +72,15 @@ int main() {
 
     // Menú de opciones
     int opcion;
+    std::cout << "===============\nPAGINA PRINCIPAL\n===============\n";
+
     std::cout << "Seleccione una opción:\n";
     std::cout << "1. Iniciar sesión\n";
     std::cout << "2. Registrar nuevo cliente\n";
     std::cout << "Opción: ";
     std::cin >> opcion;
 
+    //OPTION 1
     if (opcion == 1) {
     	if(enviarOpcion(clientSocket, opcion)){
     		std::cout << "Opcion enviada al servidor." << std::endl;
@@ -86,6 +88,7 @@ int main() {
 			std::cerr << "Error al enviar la opcion al servidor." << std::endl;
 		}
         // Iniciar sesión
+    	std::cout << "===============\nINICIO SESION\n===============\n";
         std::string usuario, contrasena;
         std::cout << "Ingrese el usuario: ";
         std::cin >> usuario;
@@ -95,9 +98,47 @@ int main() {
         // Enviar credenciales al servidor
         if (enviarCredenciales(clientSocket, usuario, contrasena)) {
             std::cout << "Credenciales enviadas al servidor." << std::endl;
+
+            // Menú después de iniciar sesión
+            std::cout << "===============================\nGESTIÓN DE GRAN RESORT FERRET\n===============================\n";
+            std::cout << "Seleccione una opción:\n";
+            std::cout << "1. Mostrar hotel\n";
+            std::cout << "2. Hacer Reserva\n";
+            std::cout << "3. Cancelar Reserva\n";
+            std::cout << "Opción: ";
+            std::cin >> opcion;
+
+//            FUNCIONALIDAD
+            if (opcion == 1) {
+            	if(enviarOpcion(clientSocket, opcion)){
+            		std::cout << "Opcion enviada al servidor." << std::endl;
+//            		mostrarHoteles();
+            	} else {
+            		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+            	}
+            } else if (opcion == 2) {
+            	if(enviarOpcion(clientSocket, opcion)){
+        		std::cout << "Opcion enviada al servidor." << std::endl;
+//        		hacerReserva();
+        	} else {
+        		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+        	}
+        } else if (opcion == 3) {
+        	if(enviarOpcion(clientSocket, opcion)){
+        		std::cout << "Opcion enviada al servidor." << std::endl;
+//        		eliminarReserva();
+        	} else {
+        		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+        	}
         } else {
-            std::cerr << "Error al enviar las credenciales al servidor." << std::endl;
+        	std::cerr << "Opción inválida." << std::endl;
         }
+
+    } else {
+    	std::cerr << "Error al enviar las credenciales al servidor." << std::endl;
+    }
+
+    //OPTION 2
     } else if (opcion == 2) {
     	if(enviarOpcion(clientSocket, opcion)){
 			std::cout << "Opcion enviada al servidor." << std::endl;
@@ -105,6 +146,7 @@ int main() {
 			std::cerr << "Error al enviar la opcion al servidor." << std::endl;
 		}
         // Registrar un nuevo cliente
+    	std::cout << "=========\nREGISTRO\n=========\n";
         std::string dni, nombre, direccion, telefono, usuario, contrasena;
         std::cin.ignore();
         std::cout << "Ingrese el DNI: ";
@@ -123,6 +165,27 @@ int main() {
         // Enviar datos al servidor
         if (registrarCliente(clientSocket, dni, nombre, direccion, telefono, usuario, contrasena)) {
             std::cout << "Cliente registrado correctamente." << std::endl;
+
+            // Menú después de registrarse
+            std::cout << "===============================\nGESTIÓN DE GRAN RESORT FERRET\n===============================\n";
+            std::cout << "Seleccione una opción:\n";
+            std::cout << "1. Mostrar hotel\n";
+            std::cout << "2. Hacer Reserva\n";
+            std::cout << "3. Cancelar Reserva\n";
+            std::cout << "Opción: ";
+            std::cin >> opcion;
+
+//            FUNCIONALIDAD
+			if (opcion == 1) {
+//				mostrarHoteles();
+			} else if (opcion == 2) {
+//				hacerReserva();
+			} else if (opcion == 3) {
+//				cancelarReserva();
+			} else {
+				std::cerr << "Opción inválida." << std::endl;
+			}
+
         } else {
             std::cerr << "Error al registrar el cliente." << std::endl;
         }

@@ -1,6 +1,6 @@
-#ifndef HOTEL_HOTELES_H_
-#define HOTEL_HOTELES_H_
-#include "Hotel.h"
+#ifndef CLASES_HOTELES_H_
+#define CLASES_HOTELES_H_
+
 
 class Hoteles {
 public:

@@ -1,10 +1,3 @@
-/*
- * Provincia.h
- *
- *  Created on: May 21, 2023
- *      Author: unaialonso
- */
-
 #ifndef CLASES_PROVINCIA_H_
 #define CLASES_PROVINCIA_H_
 

@@ -1,6 +1,9 @@
 #include "base_datos.h"
 #include "../reserva/reserva.h"
-#include "../hotel/Hotel.h"
+#include "../Clases/Hotel.h"
+#include "../Clases/Provincia.h"
+#include "../Clases/Provincias.h"
+#include "../Clases/Hoteles.h"
 #include <iostream>
 #include <string>
 #include <cstring>

@@ -1,5 +1,5 @@
-#ifndef PROVINCIA_PROVINCIAS_H_
-#define PROVINCIA_PROVINCIAS_H_
+#ifndef CLASES_PROVINCIAS_H_
+#define CLASES_PROVINCIAS_H_
 #include "Provincia.h"
 
 class Provincias {
@@ -9,4 +9,4 @@ public:
 	Provincia getProvinciaPorId(int);
 };
 
-#endif /* PROVINCIA_PROVINCIAS_H_ */
+#endif

@@ -1,7 +1,6 @@
-#include "Hotel.h"
 #include <iostream>
 #include <string.h>
-using namespace std;
+#include "Hotel.h"
 
 
 Hotel::Hotel() {

@@ -25,7 +25,6 @@ bool registrarCliente(SOCKET clientSocket, const std::string& dni, const std::st
         std::cerr << "Error al enviar los datos al servidor." << std::endl;
         return false;
     }
-
     return true;
 }
 

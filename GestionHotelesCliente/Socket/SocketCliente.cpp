@@ -1,5 +1,116 @@
 #include <iostream>
 #include <winsock2.h>
+#include <sstream>
+#include <string>
+#include "../Clases/Provincias.h"
+#include "../Clases/Hoteles.h"
+
+bool recibirProvincias(SOCKET serverSocket, Provincias* provincias){
+	// Definir un buffer para almacenar los datos recibidos
+	const int bufferSize = 4000;
+	char buffer[bufferSize];
+
+	// Recibir los datos del cliente
+	int bytesRecibidos = recv(serverSocket, buffer, bufferSize - 1, 0);
+	if (bytesRecibidos == SOCKET_ERROR) {
+		std::cerr << "Error al recibir los datos del servidor [1]." << std::endl;
+		return false;
+	}
+
+	// Terminar el buffer con un carácter nulo
+	buffer[bytesRecibidos] = '\0';
+
+	// Parsear los datos recibidos separados por comas
+	std::string datos(buffer);
+	std::stringstream ss(datos);
+
+
+	int numDatos;
+	std::string numDatosS;
+	std::getline(ss, numDatosS, ',');
+	numDatos = std::stoi(numDatosS);
+	provincias->numProvincias = numDatos;
+	memset(provincias->provincias, 0, provincias->numProvincias * sizeof(Provincia));
+	std::string nombre;
+	const char* nombreCons;
+	char* nombreChar;
+	for (int n = 0; n < numDatos; ++n) {
+		std::getline(ss, nombre, ',');
+		// Convertir std::string a const char*
+		nombreCons = nombre.c_str();
+		// Convertir const char* a char* utilizando casting explícito
+		nombreChar = const_cast<char*>(nombreCons);
+		provincias[n].provincias->setNombre(nombreChar);
+	}
+
+	return true;
+};
+bool recibirHoteles(SOCKET serverSocket, Hoteles* hoteles, Provincia * provincia){
+	// Definir un buffer para almacenar los datos recibidos
+	const int bufferSize = 4000;
+	char buffer[bufferSize];
+
+	// Recibir los datos del cliente
+	int bytesRecibidos = recv(serverSocket, buffer, bufferSize - 1, 0);
+	if (bytesRecibidos == SOCKET_ERROR) {
+		std::cerr << "Error al recibir los datos del servidor [2]." << std::endl;
+		return false;
+	}
+
+	// Terminar el buffer con un carácter nulo
+	buffer[bytesRecibidos] = '\0';
+
+	// Parsear los datos recibidos separados por comas
+	std::string datos(buffer);
+	std::stringstream ss(datos);
+
+
+	int numDatos;
+	std::string numDatosS;
+	std::getline(ss, numDatosS, ',');
+	numDatos = std::stoi(numDatosS);
+	hoteles->numHoteles = numDatos;
+	memset(hoteles->hoteles, 0, hoteles->numHoteles* sizeof(Hotel));
+	std::string nombreHotel;
+	std::string nombreProvincia;
+	const char* nombreHotelCons;
+	const char* nombreProvinciaCons;
+	char* nombreHotelChar;
+	char* nombreProvinciaChar;
+	std::string provYhotel;
+	for (int n = 0; n < numDatos; ++n) {
+		std::getline(ss, provYhotel, ',');
+		std::getline(ss, nombreHotel, ':');
+		std::getline(ss, nombreProvincia, ':');
+		nombreHotelCons = nombreHotel.c_str();
+		nombreProvinciaCons = nombreProvincia.c_str();
+		nombreHotelChar = const_cast<char*>(nombreHotelCons);
+		nombreProvinciaCons = nombreProvincia.c_str();
+		nombreProvinciaChar = const_cast<char*>(nombreProvinciaCons);
+		hoteles->hoteles[n].setNombre(nombreHotelChar);
+		provincia->setNombre(nombreProvinciaChar);
+		hoteles->hoteles[n].setProvincia(provincia);
+	}
+	return true;
+};
+
+void mostrarHoteles(Provincias* provincias, Hoteles* hoteles){
+	int opcionProv;
+	std::cout << "===============\nProvincias\n===============\n" << std::endl;
+	for (int n= 0; n < provincias->numProvincias; ++n) {
+		std::cout << n + 1 << " " << provincias->provincias[n].getNombre() << std::endl;
+	}
+	std::cout << "Opcion: ";
+	std::cin >> opcionProv;
+	std::cout << std::endl;
+	std::cout << std::endl;
+	std::cout << "===============\nHoteles\n===============\n" << std::endl;
+	for (int n = 0; n < hoteles->numHoteles; ++n) {
+		if (strcmp(hoteles->hoteles[n].getProvincia().getNombre(), provincias->provincias[opcionProv - 1].getNombre()) == 0) {
+			std::cout << n + 1 << " " << hoteles->hoteles[n].getNombre();
+		}
+	}
+}
 
 bool enviarCredenciales(SOCKET clientSocket, const std::string& usuario, const std::string& contrasena) {
     // Construir el mensaje a enviar al servidor
@@ -93,6 +204,7 @@ int menuGestion(){
 	std::cout << "1. Mostrar hotel\n";
 	std::cout << "2. Hacer Reserva\n";
 	std::cout << "3. Cancelar Reserva\n";
+	std::cout << "4. Cerrar\n";
 	std::cout << "Opción: ";
 	std::cin >> opcionSeleccionada;
 	return opcionSeleccionada;
@@ -145,6 +257,8 @@ void menuRegistroCliente( std::string& dni, std::string& nombre,std::string& dir
 }
 
 int main() {
+	// INICIAR PROVINCIAS Y HOTELES
+
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Error al inicializar winsock." << std::endl;
@@ -199,7 +313,12 @@ int main() {
             if (opcion == 1) {
             	if(enviarOpcion(clientSocket, opcion)){
             		std::cout << "Opcion enviada al servidor." << std::endl;
-//            		mostrarHoteles();
+            		Provincias* provincias;
+            		Hoteles* hoteles;
+            		Provincia* provincia;
+            		if (recibirProvincias(clientSocket, provincias) && recibirHoteles(clientSocket, hoteles, provincia)){
+            			mostrarHoteles(provincias, hoteles);
+            		}
             	} else {
             		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
             	}
@@ -236,7 +355,9 @@ int main() {
         	} else {
         		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
         	}
-        } else {
+        } else if (opcion == 4){
+    		return 0;
+    	} else {
         	std::cerr << "Opción inválida." << std::endl;
         }
 
@@ -259,42 +380,60 @@ int main() {
         if (registrarCliente(clientSocket, dni, nombre, direccion, telefono, usuario, contrasena)) {
             std::cout << "Cliente registrado correctamente." << std::endl;
 
-            // Menú después de registrarse
-            int opcion = menuGestion();
+            // Menú después de iniciar sesión
+			int opcion = menuGestion();
 
-//            FUNCIONALIDAD
-            if (opcion == 1) {
-            	if(enviarOpcion(clientSocket, opcion)){
-            		std::cout << "Opcion enviada al servidor." << std::endl;
-//            		mostrarHoteles();
-            	} else {
-            		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
-            	}
-            } else if (opcion == 2) {
-            	if(enviarOpcion(clientSocket, opcion)){
-            		std::cout << "Opcion enviada al servidor." << std::endl;
-            		// Menú reserva
-            		std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
-            		menuReserva(id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni);
+			//FUNCIONALIDAD
+			if (opcion == 1) {
+				if(enviarOpcion(clientSocket, opcion)){
+					std::cout << "Opcion enviada al servidor." << std::endl;
+					Provincias* provincias;
+					Hoteles* hoteles;
+					Provincia* provincia;
+					if (recibirProvincias(clientSocket, provincias) && recibirHoteles(clientSocket, hoteles, provincia)){
+						mostrarHoteles(provincias, hoteles);
+					}
+				} else {
+					std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+				}
+			} else if (opcion == 2) {
+				if(enviarOpcion(clientSocket, opcion)){
+				std::cout << "Opcion enviada al servidor." << std::endl;
+				// Menú reserva
+				std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
+				menuReserva(id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni);
 
-            		//enviar datos al servidor
-            		if ( enviarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini,
-            				dia_fin, mes_fin, ano_fin, id_hab, dni) ) {
-            			std::cout << "Credenciales enviadas al servidor." << std::endl;
-            		} else {
-            			std::cerr << "Error al enviar la opcion al servidor." << std::endl;
-            		}
-            	}
-            } else if (opcion == 3) {
-            	if(enviarOpcion(clientSocket, opcion)){
-            		std::cout << "Opcion enviada al servidor." << std::endl;
-//            		eliminarReserva();
-            	} else {
-            		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
-            	}
-            } else {
-            	std::cerr << "Opción inválida." << std::endl;
-            }
+				//enviar datos al servidor
+				if ( enviarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini,
+						dia_fin, mes_fin, ano_fin, id_hab, dni) ) {
+					std::cout << "Credenciales enviadas al servidor." << std::endl;
+
+				} else {
+					std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+				}
+			}
+		} else if (opcion == 3) {
+			if(enviarOpcion(clientSocket, opcion)){
+				std::cout << "Opcion enviada al servidor." << std::endl;
+				std::string id;
+				menuCancelarReserva(id);
+				//enviar datos al servidor
+				if ( enviarReservaACancelar(clientSocket, id) ) {
+					std::cout << "Credenciales enviadas al servidor." << std::endl;
+
+
+				} else {
+					std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+				}
+
+			} else {
+				std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+			}
+		} else if (opcion == 4){
+			return 0;
+		} else {
+			std::cerr << "Opción inválida." << std::endl;
+		}
 
         } else {
             std::cerr << "Error al registrar el cliente." << std::endl;

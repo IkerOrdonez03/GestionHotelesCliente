@@ -1,10 +1,3 @@
-/*
- * Provincia.cpp
- *
- *  Created on: May 21, 2023
- *      Author: unaialonso
- */
-
 #include "Provincia.h"
 #include <iostream>
 #include <string.h>
@@ -14,8 +7,6 @@ Provincia::Provincia(int id, const char* nombre) {
 	this->id = id;
 	this->nombre = new char[strlen(nombre) + 1];
 	strcpy(this->nombre, nombre);
-
-
 }
 
 Provincia::~Provincia() {
@@ -31,7 +22,14 @@ int Provincia::getId(){
 	return this->id;
 }
 
+void Provincia::setNombre(char* nombre){
+	this->nombre = nombre;
+};
+
+void Provincia::setId(int id){
+	this->id = id;
+};
+
 void Provincia::imprimirProvincia(){
 	std::cout << "Nombre: " << this->getNombre() << " Id: " << this->getId() << std::endl;
 }
-

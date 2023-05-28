@@ -11,18 +11,15 @@
 #include "../reserva/reserva.h"
 
 
-// Primera entrega
-int validadAdmin(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
+char* parseInt(char *resultado, int n);
+int validadAdmin(char* usuario, char* clave, sqlite3* db);
+int contarProvincias(sqlite3* db);
+int contarHoteles(sqlite3 *db);
+int initHoteles(Hoteles* hoteles, sqlite3* db, Provincias* provincias);
+int initProvinvias(Provincias* provincias, sqlite3* db);
+int insertarReserva(Reserva *reserva, sqlite3* db);
 int validaCliente(char* usuario, char* clave, sqlite3* db);
-int contarProvincias(sqlite3*);
-int initProvincias (Provincias*, sqlite3*);
-int contarHoteles(sqlite3*);
-int initHoteles (Hoteles*, sqlite3*, Provincias*);
-int insertarHotel (Hotel *, sqlite3*);
-int insertarReserva(Reserva *, sqlite3*);
-int eliminarHotel (Hotel*, sqlite3*);
-int eliminarReserva(const std::string&, sqlite3*);
-int validaCliente(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
 int insertarCliente(const std::string& dni, const std::string& nombre, const std::string& direccion, const std::string& telefono, const std::string& usuario, const std::string& clave, sqlite3* db);
+int eliminarReserva(const std::string& id, sqlite3* db);
 
 #endif /* BASE_DATOS_H_ */

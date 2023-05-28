@@ -2,11 +2,77 @@
 #include "../bd/sqlite3.h"
 #include "../bd/base_datos.h"
 #include "../reserva/reserva.h"
+#include "../Clases/Provincias.h"
+#include "../Clases/Hoteles.h"
 #include <winsock2.h>
 #include <sstream>
 #include <string>
 using namespace std;
 static int opcionElegida;
+
+bool recaudarProvincias(Provincias* provincias, sqlite3 * db){
+	if (initProvinvias(provincias, db) == 0){
+		std::cout << "Provincias recogidas correctamente" << std::endl;
+	} else {
+		std::cerr << "Error al recoger las provincias" << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool enviarProvincias(SOCKET clientSocket, Provincias* provincias, sqlite3 * db){
+	// Construir el mensaje a enviar al servidor
+	std::string mensaje;
+	int totalProvincias = contarProvincias(db);
+	mensaje += totalProvincias + ",";
+	for (int n = 0; n < totalProvincias - 1; ++n) {
+		mensaje += provincias->provincias[n].getNombre();
+		mensaje += ",";
+	}
+	mensaje += provincias->provincias[totalProvincias - 1].getNombre();
+	// Enviar los datos al servidor
+	int bytesEnviados = send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+	if (bytesEnviados == SOCKET_ERROR) {
+		std::cerr << "Error al enviar los datos al cliente." << std::endl;
+		return false;
+	}
+	std::cout << "Provincias enviadas correctamente" << std::endl;
+	std::cout << provincias->provincias[0].getNombre() << std::endl;
+	return true;
+}
+
+bool recaudarHoteles(Hoteles* hoteles, Provincias* provincias, sqlite3 * db){
+	if (initHoteles(hoteles, db, provincias) == 0){
+	} else {
+		std::cerr << "Error al recoger los hoteles" << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool enviarHoteles(SOCKET clientSocket, Hoteles* hoteles, sqlite3 * db){
+	// Construir el mensaje a enviar al servidor
+	std::string mensaje;
+	int totalHoteles = contarHoteles(db);
+	mensaje += totalHoteles + ",";
+	for (int n = 0; n < totalHoteles - 1; ++n) {
+		mensaje += hoteles->hoteles[n].getNombre();
+		mensaje += ":";
+		mensaje += hoteles->hoteles[n].getProvincia().getNombre();
+		mensaje += ",";
+	}
+	mensaje += hoteles->hoteles[totalHoteles - 1].getNombre();
+	mensaje += ":";
+	mensaje += hoteles->hoteles[totalHoteles - 1].getProvincia().getNombre();
+
+	// Enviar los datos al servidor
+	int bytesEnviados = send(clientSocket, mensaje.c_str(), mensaje.length(), 0);
+	if (bytesEnviados == SOCKET_ERROR) {
+		std::cerr << "Error al enviar los datos al cliente." << std::endl;
+		return false;
+	}
+	return true;
+}
 
 bool recibirReserva(SOCKET clientSocket, std::string&id_res, std::string&dia_ini, std::string&mes_ini, std::string&ano_ini,
 		std::string&dia_fin, std::string&mes_fin, std::string&ano_fin, std::string&id_hab, std::string&dni) {
@@ -274,6 +340,30 @@ int main() {
 						if (recibirOpcion(clientSocket, opcionElegida)){
 							std::cout << "Opcion: " << opcionElegida << std::endl;
 							if (opcionElegida == 1){
+								//enviar las provincias existentes
+								Provincias* provincias;
+								if (recaudarProvincias(provincias, db)){
+									std::cout << "Provincias recaudadas correctamente." << std::endl;
+									if (enviarProvincias(clientSocket, provincias, db)){
+										std::cout << "Provincias enviadas correctamente." << std::endl;
+									} else {
+										std::cerr << "Provincias enviadas incorrectamente." << std::endl;
+									}
+								} else {
+									std::cerr << "Provincias recaudadas incorrectamente." << std::endl;
+								}
+								//enviar los hoteles existentes
+								Hoteles* hoteles;
+								if (recaudarHoteles(hoteles, provincias, db)){
+									std::cout << "Hoteles recaudados correctamente." << std::endl;
+									if (enviarHoteles(clientSocket, hoteles, db)){
+										std::cout << "Hoteles enviados correctamente." << std::endl;
+									} else {
+										std::cerr << "Hoteles enviados incorrectamente." << std::endl;
+									}
+								} else {
+									std::cerr << "Hoteles recaudados incorrectamente." << std::endl;
+								}
 
 							} else if(opcionElegida == 2){
 								std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
@@ -302,8 +392,10 @@ int main() {
 										std::cerr << "Reserva eliminada incorrectamente" << std::endl;
 									}
 								}
+							} else if (opcionElegida == 4){
+								break;
 							} else {
-								std::cerr << "Reserva recibida incorrectamente" << std::endl;
+								std::cerr << "Opcion Incorrecta" << std::endl;
 							}
 						}
 
@@ -326,8 +418,33 @@ int main() {
 
 //						Recibe la opcion del segundo menu
 						if (recibirOpcion(clientSocket, opcionElegida)) {
+							std::cout << "Opcion: " << opcionElegida << std::endl;
 							if (opcionElegida == 1){
-								std::cout << "Opcion recibida 1." << std::endl;
+								//enviar las provincias existentes
+								Provincias* provincias;
+								if (recaudarProvincias(provincias, db)){
+									std::cout << "Provincias recaudadas correctamente." << std::endl;
+									if (enviarProvincias(clientSocket, provincias, db)){
+										std::cout << "Provincias enviadas correctamente." << std::endl;
+									} else {
+										std::cerr << "Provincias enviadas incorrectamente." << std::endl;
+									}
+								} else {
+									std::cerr << "Provincias recaudadas incorrectamente." << std::endl;
+								}
+								//enviar los hoteles existentes
+								Hoteles* hoteles;
+								if (recaudarHoteles(hoteles, provincias, db)){
+									std::cout << "Hoteles recaudados correctamente." << std::endl;
+									if (enviarHoteles(clientSocket, hoteles, db)){
+										std::cout << "Hoteles enviados correctamente." << std::endl;
+									} else {
+										std::cerr << "Hoteles enviados incorrectamente." << std::endl;
+									}
+								} else {
+									std::cerr << "Hoteles recaudados incorrectamente." << std::endl;
+								}
+
 							} else if(opcionElegida == 2){
 								std::string id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni;
 								if(recibirReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni)){
@@ -336,17 +453,30 @@ int main() {
 									std::cout << "Dni: " << dni << std::endl;
 									std::cout << "Fecha inicio: " << dia_ini << "/" << mes_ini << "/" << ano_ini << std::endl;
 									std::cout << "Fecha fin: " << dia_fin << "/" << mes_fin << "/" << ano_fin << std::endl;
-								if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
-									std::cout << "Reserva realizada correctamente" << std::endl;
-								} else {
-									std::cerr << "Reserva realizada incorrectamente" << std::endl;
-								}
-							} else if (opcionElegida == 3){
 
-							} else {}
-						} else if (opcionElegida == 3){
-								std::cout << "Opcion recibida 3." << std::endl;
-							} else{}
+									if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
+										std::cout << "Reserva realizada correctamente" << std::endl;
+									} else {
+										std::cerr << "Reserva realizada incorrectamente" << std::endl;
+									}
+								}
+
+							} else if (opcionElegida == 3){
+								std::string id_resCanc;
+								if(recibirReservaACancelar(clientSocket, id_resCanc)){ //TODO:
+									std::cout << "Datos de la reserva recibidos:" << std::endl;
+									std::cout << "Id reserva: " << id_resCanc << std::endl;
+									if (eliminarReservaRecibida(clientSocket, id_resCanc, db)) {
+										std::cout << "Reserva eliminada correctamente" << std::endl;
+									} else {
+										std::cerr << "Reserva eliminada incorrectamente" << std::endl;
+									}
+								}
+							} else if (opcionElegida == 4){
+								break;
+							} else {
+								std::cerr << "Opcion Incorrecta" << std::endl;
+							}
 
 						} else {
 							std::cout << "Usuario: " << dni << ", " << nombre << ", " << usuario << ". " << "Registrado incorrectamente" << std::endl;
@@ -367,10 +497,10 @@ int main() {
     //CERRAR LA BD
 	result = sqlite3_close(db);
 	if (result != SQLITE_OK) {
-		logMensaje(strcat("\nError closing database", sqlite3_errmsg(db)));
+		std::cout << strcat("\nError closing database", sqlite3_errmsg(db)) << std::endl;
 		return result;
 	}
-	logMensaje("\nDatabase closed");
+	std::cout << "\nDatabase closed" << std::endl;
     // Cerrar el socket del servidor y limpiar winsock
     closesocket(serverSocket);
     WSACleanup();

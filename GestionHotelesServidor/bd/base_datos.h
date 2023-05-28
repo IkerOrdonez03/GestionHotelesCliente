@@ -21,10 +21,8 @@ int initHoteles (Hoteles*, sqlite3*, Provincias*);
 int insertarHotel (Hotel *, sqlite3*);
 int insertarReserva(Reserva *, sqlite3*);
 int eliminarHotel (Hotel*, sqlite3*);
-
-// Segunda entrega
+int eliminarReserva(const std::string&, sqlite3*);
 int validaCliente(char*, char*, sqlite3*); // 0 es valido(el resto invalido)
-
 int insertarCliente(const std::string& dni, const std::string& nombre, const std::string& direccion, const std::string& telefono, const std::string& usuario, const std::string& clave, sqlite3* db);
 
 #endif /* BASE_DATOS_H_ */

@@ -28,6 +28,18 @@ bool enviarReserva(SOCKET clientSocket, const std::string&id_res, const std::str
     return true;
 }
 
+bool enviarReservaACancelar(SOCKET clientSocket, const std::string& id_res) {
+    // Enviar los datos al servidor
+    int bytesEnviados = send(clientSocket, id_res.c_str(), id_res.length(), 0);
+    if (bytesEnviados == SOCKET_ERROR) {
+        std::cerr << "Error al enviar los datos al servidor." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
 bool enviarOpcion(SOCKET clientSocket, int opcion) {
     // Construir el mensaje a enviar al servidor
 	std::string mensaje = std::to_string(opcion);
@@ -107,6 +119,12 @@ void menuReserva(std::string& id_res, std::string& dia_ini, std::string& mes_ini
 	std::cin >> id_hab;
 	std::cout << "Introduzca su dni: ";
 	std::cin >> dni;
+}
+
+void menuCancelarReserva(std::string& id_res){
+	std::cout << "================\nCANCELAR RESERVA\n================\n";
+	std::cout << "Introduzca el id de la reserva: ";
+	std::cin >> id_res;
 }
 
 void menuRegistroCliente( std::string& dni, std::string& nombre,std::string& direccion ,std::string& telefono, std::string& usuario, std::string& contrasena){
@@ -204,7 +222,17 @@ int main() {
         } else if (opcion == 3) {
         	if(enviarOpcion(clientSocket, opcion)){
         		std::cout << "Opcion enviada al servidor." << std::endl;
-//        		eliminarReserva();
+        		std::string id;
+        		menuCancelarReserva(id);
+        		//enviar datos al servidor
+				if ( enviarReservaACancelar(clientSocket, id) ) {
+					std::cout << "Credenciales enviadas al servidor." << std::endl;
+
+
+				} else {
+					std::cerr << "Error al enviar la opcion al servidor." << std::endl;
+				}
+
         	} else {
         		std::cerr << "Error al enviar la opcion al servidor." << std::endl;
         	}

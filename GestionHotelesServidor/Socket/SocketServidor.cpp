@@ -41,6 +41,28 @@ bool recibirReserva(SOCKET clientSocket, std::string&id_res, std::string&dia_ini
 	return true;
 }
 
+bool recibirReservaACancelar(SOCKET clientSocket, std::string& id_res) {
+    // Definir un buffer para recibir los datos del servidor
+    const int bufferSize = 1024;
+    char buffer[bufferSize];
+
+    // Recibir los datos del servidor
+    int bytesRecibidos = recv(clientSocket, buffer, bufferSize - 1, 0);
+    if (bytesRecibidos == SOCKET_ERROR) {
+        std::cerr << "Error al recibir los datos del servidor." << std::endl;
+        return false;
+    }
+
+    // Colocar el carácter nulo al final del buffer recibido para convertirlo en una cadena de caracteres
+    buffer[bytesRecibidos] = '\0';
+
+    // Asignar el valor recibido a la variable id_res
+    id_res = buffer;
+
+    return true;
+}
+
+
 bool registrarReserva(SOCKET clientSocket,std::string&id_res, std::string&dia_ini, std::string&mes_ini, std::string&ano_ini,
 		std::string&dia_fin, std::string&mes_fin, std::string&ano_fin, std::string&id_hab, std::string&dni, sqlite3* db){
 	Reserva *reserva = new Reserva(std::stoi(id_res), std::stoi(dia_ini), std::stoi(mes_ini), std::stoi(ano_ini), std::stoi(dia_fin), std::stoi(mes_fin), std::stoi(ano_fin), std::stoi(id_hab), std::stoi(dni));
@@ -48,6 +70,23 @@ bool registrarReserva(SOCKET clientSocket,std::string&id_res, std::string&dia_in
 	delete(reserva);
 	if (result != SQLITE_OK) {
 		std::cerr << "Error al insertar la reserva en la base de datos." << std::endl;
+		return false;
+	}
+
+	// Enviar respuesta al cliente
+	std::string respuesta = "Reserva registrada correctamente.";
+	int bytesEnviados = send(clientSocket, respuesta.c_str(), respuesta.length(), 0);
+	if (bytesEnviados == SOCKET_ERROR) {
+		std::cerr << "Error al enviar la respuesta al cliente." << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool eliminarReservaRecibida(SOCKET clientSocket, std::string&id_res, sqlite3* db){
+	int result = eliminarReserva(id_res, db);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al eliminar la reserva en la base de datos." << std::endl;
 		return false;
 	}
 
@@ -244,19 +283,34 @@ int main() {
 									std::cout << "Dni: " << dni << std::endl;
 									std::cout << "Fecha inicio: " << dia_ini << "/" << mes_ini << "/" << ano_ini << std::endl;
 									std::cout << "Fecha fin: " << dia_fin << "/" << mes_fin << "/" << ano_fin << std::endl;
-								if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
-									std::cout << "Reserva realizada correctamente" << std::endl;
-								} else {
-									std::cerr << "Reserva realizada incorrectamente" << std::endl;
-								}
-							} else if (opcionElegida == 3){
 
-							} else {}
+									if (registrarReserva(clientSocket, id_res, dia_ini, mes_ini, ano_ini, dia_fin, mes_fin, ano_fin, id_hab, dni, db)) {
+										std::cout << "Reserva realizada correctamente" << std::endl;
+									} else {
+										std::cerr << "Reserva realizada incorrectamente" << std::endl;
+									}
+								}
+
+							} else if (opcionElegida == 3){
+								std::string id_resCanc;
+								if(recibirReservaACancelar(clientSocket, id_resCanc)){ //TODO:
+									std::cout << "Datos de la reserva recibidos:" << std::endl;
+									std::cout << "Id reserva: " << id_resCanc << std::endl;
+									if (eliminarReservaRecibida(clientSocket, id_resCanc, db)) {
+										std::cout << "Reserva eliminada correctamente" << std::endl;
+									} else {
+										std::cerr << "Reserva eliminada incorrectamente" << std::endl;
+									}
+								}
+							} else {
+								std::cerr << "Reserva recibida incorrectamente" << std::endl;
+							}
 						}
 
 					} else {
 						std::string respuesta = "Autenticación erronea";
 						std::cout << respuesta << std::endl;
+						//TODO: TERMINAR PROGRAMA
 					}
 					// ...
 
@@ -309,7 +363,6 @@ int main() {
 
         // Cerrar el socket del cliente
         closesocket(clientSocket);
-    }
     }
     //CERRAR LA BD
 	result = sqlite3_close(db);

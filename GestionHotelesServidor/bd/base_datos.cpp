@@ -303,3 +303,30 @@ int insertarCliente(const std::string& dni, const std::string& nombre, const std
     return SQLITE_OK;
 }
 
+int eliminarReserva(const std::string& id, sqlite3* db){
+	sqlite3_stmt* stmt;
+	const char* sql = "DELETE FROM RESERVA WHERE ID_RES = ?";
+
+	int result = sqlite3_bind_text(stmt, 1, id.c_str(), -1, SQLITE_STATIC);
+	if (result != SQLITE_OK) {
+		std::cerr << "Error al asociar el valor a la consulta SQL: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	result = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	if (result != SQLITE_OK) {
+		std::cout << "Error preparing statement: " << sqlite3_errmsg(db) << std::endl;
+		return result;
+	}
+
+	result = sqlite3_step(stmt);
+	if (result != SQLITE_DONE) {
+		std::cout << "Error inserting reservation: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(stmt);
+		return result;
+	}
+
+	sqlite3_finalize(stmt);
+	return SQLITE_OK;
+
+}
+
